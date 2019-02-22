@@ -19,8 +19,8 @@ const discord = require('discord.js')
 const client = new discord.Client()
 const artisan = require('discord.js-artisan')
 
-artisan.start(bot)
-bot.login('YOUR_USER_TOKEN_HERE').catch(console.error)
+artisan.start(client)
+client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
 ```
 
 ### Commands
