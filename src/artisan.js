@@ -1,6 +1,6 @@
 const logger = require('./logger')
 const { resolve } = require('path')
-const { sleep, download, writeToFile, asyncForEach } = require('./util/Util')
+const { download, writeToFile } = require('./util/Util')
 
 class Artisan {
   constructor () {
@@ -46,9 +46,9 @@ class Artisan {
       const { lastMessageId, filteredMessages } = await this.getMessages(channel, messageId)
 
       if (filteredMessages.length) {
-        let count = 0
+        const jobs = []
 
-        await asyncForEach(filteredMessages, async message => {
+        filteredMessages.forEach(message => {
           const { author, channel, content, createdAt, attachments } = message
           const channelId = channel.id
 
@@ -59,27 +59,25 @@ class Artisan {
             const time = createdAtDate.toLocaleTimeString()
 
             const file = resolve(__dirname, `../dump/${channelId}/${date}/messages.txt`)
-            await writeToFile(file, `[${time}] ${author.tag}: ${content}\n`)
+            jobs.push(writeToFile(file, `[${time}] ${author.tag}: ${content}\n`))
           }
 
           if (attachments.size) {
             const attachmentsArray = attachments.array()
 
-            await asyncForEach(attachmentsArray, async attachment => {
-              const { filename, proxyURL } = attachment
+            attachmentsArray.map(attachment => {
+              const { proxyURL, filename } = attachment
 
               const file = resolve(__dirname, `../dump/${channelId}/${date}/files/${filename}`)
-              await download(proxyURL, file)
+              jobs.push(download(proxyURL, file))
             })
           }
-
-          count += 1
         })
 
-        if (count > 0) {
-          totalCount += count
-          logger.info(`Currently saved ${totalCount} message(-s) ${place}`)
-        }
+        await Promise.all(jobs.map(j => j.catch(e => e)))
+
+        totalCount += filteredMessages.length
+        logger.info(`Currently saved ${totalCount} message(-s) ${place}`)
 
         return this.dumper(channel, lastMessageId, totalCount)
       } else {
@@ -96,23 +94,18 @@ class Artisan {
       const { lastMessageId, filteredMessages } = await this.getMessages(channel, messageId)
 
       if (filteredMessages.length) {
-        let count = 0
+        const jobs = []
 
-        await asyncForEach(filteredMessages, async message => {
-          const { deletable } = message
-
-          if (deletable) {
-            await message.delete()
-
-            count += 1
-            await sleep(2e3)
+        filteredMessages.forEach(message => {
+          if (message.deletable) {
+            jobs.push(message.delete())
           }
         })
 
-        if (count > 0) {
-          totalCount += count
-          logger.info(`Currently deleted ${totalCount} message(-s) ${place}`)
-        }
+        if (jobs.length) await Promise.all(jobs.map(j => j.catch(e => e)))
+
+        totalCount += jobs.length
+        logger.info(`Currently deleted ${totalCount} message(-s) ${place}`)
 
         return this.cleaner(channel, lastMessageId, totalCount)
       } else {

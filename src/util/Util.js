@@ -2,8 +2,8 @@ const fs = require('fs-extra')
 const axios = require('axios')
 
 exports.sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-exports.download = async (url, path) => {
-  return fs.ensureFile(path)
+exports.download = async (url, file) => {
+  return fs.ensureFile(file)
     .then(() => {
       return axios({
         url,
@@ -11,7 +11,7 @@ exports.download = async (url, path) => {
         responseType: 'stream'
       })
         .then(response => {
-          const writer = fs.createWriteStream(path)
+          const writer = fs.createWriteStream(file)
           response.data.pipe(writer)
 
           return new Promise((resolve, reject) => {
@@ -25,10 +25,4 @@ exports.download = async (url, path) => {
 exports.writeToFile = async (file, data) => {
   return fs.ensureFile(file)
     .then(() => fs.appendFile(file, data))
-}
-
-exports.asyncForEach = async (array, callback) => {
-  for (let i = 0; i < array.length; i++) {
-    await callback(array[i], i, array)
-  }
 }
