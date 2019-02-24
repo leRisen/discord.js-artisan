@@ -1,5 +1,5 @@
 const logger = require('./logger')
-const { resolve } = require('path')
+const { join } = require('path')
 const { download, writeToFile } = require('./util/Util')
 
 class Artisan {
@@ -58,7 +58,7 @@ class Artisan {
           if (content.length) {
             const time = createdAtDate.toLocaleTimeString()
 
-            const file = resolve(__dirname, `../dump/${channelId}/${date}/messages.txt`)
+            const file = join(`dump/${channelId}/${date}`, 'messages.txt')
             jobs.push(writeToFile(file, `[${time}] ${author.tag}: ${content}\n`))
           }
 
@@ -68,7 +68,7 @@ class Artisan {
             attachmentsArray.map(attachment => {
               const { proxyURL, filename } = attachment
 
-              const file = resolve(__dirname, `../dump/${channelId}/${date}/files/${filename}`)
+              const file = join(`dump/${channelId}/${date}/files`, filename)
               jobs.push(download(proxyURL, file))
             })
           }
