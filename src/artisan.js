@@ -2,11 +2,9 @@ const logger = require('./logger')
 const { join } = require('path')
 const { download, writeToFile } = require('./util/Util')
 
-class Artisan {
-  constructor () {
-    this.MAX_LIMIT = 100
-  }
+const MAX_LIMIT = 100
 
+class Artisan {
   messageFilter ({ content, attachments }) {
     return content.length || attachments.size
   }
@@ -16,7 +14,7 @@ class Artisan {
   }
 
   async getMessages (channel, messageId) {
-    return channel.fetchMessages({ before: messageId, limit: this.MAX_LIMIT })
+    return channel.fetchMessages({ before: messageId, limit: MAX_LIMIT })
       .then(messages => {
         const messagesArray = messages.array()
         const lastMessage = messagesArray[messagesArray.length - 1]
@@ -26,7 +24,7 @@ class Artisan {
             .filter(this.messageFilter)
             .sort(this.sortByCreatedAt)
 
-        logger.info(`Receiving ${this.MAX_LIMIT} messages after the message with id ${messageId}`)
+        logger.info(`Receiving ${MAX_LIMIT} messages after the message with id ${messageId}`)
 
         return {
           lastMessageId: (lastMessage && lastMessage.id) || 0,
