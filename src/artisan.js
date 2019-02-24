@@ -19,10 +19,7 @@ class Artisan {
         const messagesArray = messages.array()
         const lastMessage = messagesArray[messagesArray.length - 1]
 
-        const filteredMessages =
-          messagesArray
-            .filter(this.messageFilter)
-            .sort(this.sortByCreatedAt)
+        const filteredMessages = messagesArray.filter(this.messageFilter)
 
         logger.info(`Receiving ${MAX_LIMIT} messages after the message with id ${messageId}`)
 
@@ -45,8 +42,9 @@ class Artisan {
 
       if (filteredMessages.length) {
         const jobs = []
+        const sortedMessages = filteredMessages.sort(this.sortByCreatedAt)
 
-        filteredMessages.forEach(message => {
+        sortedMessages.forEach(message => {
           const { author, channel, content, createdAt, attachments } = message
           const channelId = channel.id
 
