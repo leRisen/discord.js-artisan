@@ -5,6 +5,10 @@ const { download, writeToFile } = require('./util/Util')
 const MAX_LIMIT = 100
 
 class Artisan {
+  constructor (options) {
+    this.pathToSave = (options && options.pathToSave) || './dump'
+  }
+
   messageFilter ({ content, attachments }) {
     return content.length || attachments.size
   }
@@ -54,7 +58,7 @@ class Artisan {
           if (content.length) {
             const time = createdAtDate.toLocaleTimeString()
 
-            const file = join(`dump/${channelId}/${date}`, 'messages.txt')
+            const file = join(this.pathToSave, `${channelId}/${date}`, 'messages.txt')
             jobs.push(writeToFile(file, `[${time}] ${author.tag}: ${content}\n`))
           }
 
@@ -64,7 +68,7 @@ class Artisan {
             attachmentsArray.map(attachment => {
               const { proxyURL, filename } = attachment
 
-              const file = join(`dump/${channelId}/${date}/files`, filename)
+              const file = join(this.pathToSave, `${channelId}/${date}/files`, filename)
               jobs.push(download(proxyURL, file))
             })
           }

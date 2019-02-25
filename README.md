@@ -32,9 +32,10 @@ client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
 
 ### Available options
 
-| Type | Name | Default
-| --- | --- | --- |
-| String | clearCommand | cl |
-| String | dumpCommand | du |
+| Type | Name | Description | Default
+| --- | --- | --- | --- |
+| String | pathToSave | Path where dumper files will be stored | folder "dump" in work directory |
+| String | clearCommand | Command to call Cleaner | cl |
+| String | dumpCommand | Command to call Dumper | du |
 
 > These options need to be placed in the object and passed at `artisan.start(client, { options })`
