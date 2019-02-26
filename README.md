@@ -1,3 +1,5 @@
+<p align="center"><img src="https://nodei.co/npm/discord.js-artisan.png?downloads=true&stars=true" alt="NPM info"/></p>
+
 # Discord Artisan
 *this add-in that allows you to delete, save messages with files from the dialogue/channels in the Discord.*
 
@@ -15,9 +17,9 @@
 
 ```js
 const discord = require('discord.js')
+const artisan = require('discord.js-artisan')
 
 const client = new discord.Client()
-const artisan = require('discord.js-artisan')
 
 artisan.start(client)
 client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
@@ -28,13 +30,14 @@ client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
 - `cl`: deleting your messages
 - `du`: save all messages with files
 
-> These commands need to be entered in the dialogue/channel.
-
 ### Available options
 
-| Type | Name | Default
-| --- | --- | --- |
-| String | clearCommand | cl |
-| String | dumpCommand | du |
+| Type | Name | Description | Default
+| --- | --- | --- | --- |
+| String | pathToSave | Path where dumper files will be stored | folder "dump" in work directory |
+| Boolean | saveEmbeds | Whether to save embeds | false |
+| Boolean | saveAttachments | Whether to save attachments | true |
+| String | clearCommand | Command to call Cleaner | cl |
+| String | dumpCommand | Command to call Dumper | du |
 
 > These options need to be placed in the object and passed at `artisan.start(client, { options })`

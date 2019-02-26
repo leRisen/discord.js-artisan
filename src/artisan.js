@@ -1,32 +1,34 @@
 const logger = require('./logger')
 const { join } = require('path')
+const CircularJSON = require('circular-json')
 const { download, writeToFile } = require('./util/Util')
 
+const MAX_LIMIT = 100
+
 class Artisan {
-  constructor () {
-    this.MAX_LIMIT = 100
+  constructor (options) {
+    this.pathToSave = (options && options.pathToSave) || './dump'
+    this.saveEmbeds = (options && options.saveEmbeds) || false
+    this.saveAttachments = (options && options.saveAttachments) || true
   }
 
-  messageFilter ({ content, attachments }) {
-    return content.length || attachments.size
+  messageFilter ({ embeds, content, attachments }) {
+    return embeds.length || content.length || attachments.size
   }
 
   sortByCreatedAt (a, b) {
     return (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0)
   }
 
-  async getMessages (channel, messageId) {
-    return channel.fetchMessages({ before: messageId, limit: this.MAX_LIMIT })
+  getMessages (channel, messageId) {
+    return channel.fetchMessages({ before: messageId, limit: MAX_LIMIT })
       .then(messages => {
         const messagesArray = messages.array()
         const lastMessage = messagesArray[messagesArray.length - 1]
 
-        const filteredMessages =
-          messagesArray
-            .filter(this.messageFilter)
-            .sort(this.sortByCreatedAt)
+        const filteredMessages = messagesArray.filter(this.messageFilter)
 
-        logger.info(`Receiving ${this.MAX_LIMIT} messages after the message with id ${messageId}`)
+        logger.info(`Receiving ${MAX_LIMIT} messages after the message with id ${messageId}`)
 
         return {
           lastMessageId: (lastMessage && lastMessage.id) || 0,
@@ -40,48 +42,81 @@ class Artisan {
     return recipient ? `in dialogue (${recipient.username})` : `in channel (${name})`
   }
 
-  async dumper (channel, messageId, totalCount = 0) {
+  async dumper (channel, messageId, total = {
+    embeds: 0,
+    messages: 0,
+    attachments: 0
+  }) {
     try {
       const place = this.getPlaceUsingChannel(channel)
       const { lastMessageId, filteredMessages } = await this.getMessages(channel, messageId)
 
       if (filteredMessages.length) {
         const jobs = []
+        const sortedMessages = filteredMessages.sort(this.sortByCreatedAt)
 
-        filteredMessages.forEach(message => {
-          const { author, channel, content, createdAt, attachments } = message
+        sortedMessages.forEach(message => {
+          const { author, channel, embeds, content, createdAt, attachments } = message
           const channelId = channel.id
 
           const createdAtDate = new Date(createdAt)
+
           const date = createdAtDate.toLocaleDateString()
+          const time = createdAtDate.toLocaleTimeString()
+
+          const path = join(this.pathToSave, `${channelId}/${date}`)
+
+          const messageFormat = `[${time}] ${author.tag}`
+          const messageHistoryFile = join(path, 'messages.txt')
 
           if (content.length) {
-            const time = createdAtDate.toLocaleTimeString()
+            jobs.push(writeToFile(messageHistoryFile, `${messageFormat}: ${content}\n`))
 
-            const file = join(`dump/${channelId}/${date}`, 'messages.txt')
-            jobs.push(writeToFile(file, `[${time}] ${author.tag}: ${content}\n`))
+            total.messages += 1
           }
 
-          if (attachments.size) {
+          if (embeds.length && this.saveEmbeds) {
+            embeds.forEach((embed, n) => {
+              delete embed.message
+
+              const name = `embed_${n + 1}.json`
+              const object = CircularJSON.stringify(embed, null, 4)
+              const embedFile = join(path, name)
+
+              jobs.push(
+                writeToFile(embedFile, object),
+                writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
+              )
+            })
+
+            total.embeds += embeds.length
+          }
+
+          if (attachments.size && this.saveAttachments) {
             const attachmentsArray = attachments.array()
 
-            attachmentsArray.map(attachment => {
-              const { proxyURL, filename } = attachment
+            attachmentsArray.forEach(attachment => {
+              const { id, proxyURL, filename } = attachment
 
-              const file = join(`dump/${channelId}/${date}/files`, filename)
-              jobs.push(download(proxyURL, file))
+              const name = `${id}_${filename}`
+              const attachmentFile = join(path, `files/${name}`)
+
+              jobs.push(
+                download(proxyURL, attachmentFile),
+                writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
+              )
             })
+
+            total.attachments += attachmentsArray.length
           }
         })
 
         await Promise.all(jobs.map(j => j.catch(e => e)))
+        logger.info(`Currently saved ${JSON.stringify(total)} ${place}`)
 
-        totalCount += filteredMessages.length
-        logger.info(`Currently saved ${totalCount} message(-s) ${place}`)
-
-        return this.dumper(channel, lastMessageId, totalCount)
+        return this.dumper(channel, lastMessageId, total)
       } else {
-        logger.info(`All messages have been saved ${place}`)
+        logger.info(`${JSON.stringify(total)} has been saved ${place}`)
       }
     } catch (err) {
       logger.error('Oops, there was an error in "Dumper"\n\t', new Error(err))

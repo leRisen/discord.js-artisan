@@ -1,11 +1,11 @@
 const logger = require('./logger')
-
 const Artisan = require('./artisan')
-const artisan = new Artisan()
 
 exports.start = (client, options) => {
   const dumpCommand = (options && options.dumpCommand) || 'du'
   const clearCommand = (options && options.clearCommand) || 'cl'
+
+  const artisan = new Artisan(options)
 
   client
     .on('warn', logger.warn)
