@@ -1,5 +1,6 @@
 const logger = require('./logger')
 const { join } = require('path')
+const CircularJSON = require('circular-json')
 const { download, writeToFile } = require('./util/Util')
 
 const MAX_LIMIT = 100
@@ -7,17 +8,18 @@ const MAX_LIMIT = 100
 class Artisan {
   constructor (options) {
     this.pathToSave = (options && options.pathToSave) || './dump'
+    this.saveEmbeds = (options && options.saveEmbeds) || false
   }
 
-  messageFilter ({ content, attachments }) {
-    return content.length || attachments.size
+  messageFilter ({ embeds, content, attachments }) {
+    return embeds.length || content.length || attachments.size
   }
 
   sortByCreatedAt (a, b) {
     return (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0)
   }
 
-  async getMessages (channel, messageId) {
+  getMessages (channel, messageId) {
     return channel.fetchMessages({ before: messageId, limit: MAX_LIMIT })
       .then(messages => {
         const messagesArray = messages.array()
@@ -49,27 +51,49 @@ class Artisan {
         const sortedMessages = filteredMessages.sort(this.sortByCreatedAt)
 
         sortedMessages.forEach(message => {
-          const { author, channel, content, createdAt, attachments } = message
+          const { author, channel, embeds, content, createdAt, attachments } = message
           const channelId = channel.id
 
           const createdAtDate = new Date(createdAt)
+
           const date = createdAtDate.toLocaleDateString()
+          const time = createdAtDate.toLocaleTimeString()
+
+          const path = join(this.pathToSave, `${channelId}/${date}`)
+
+          const messageFormat = `[${time}] ${author.tag}`
+          const messageHistoryFile = join(path, 'messages.txt')
 
           if (content.length) {
-            const time = createdAtDate.toLocaleTimeString()
+            jobs.push(writeToFile(messageHistoryFile, `${messageFormat}: ${content}\n`))
+          }
 
-            const file = join(this.pathToSave, `${channelId}/${date}`, 'messages.txt')
-            jobs.push(writeToFile(file, `[${time}] ${author.tag}: ${content}\n`))
+          if (embeds.length && this.saveEmbeds) {
+            embeds.forEach((embed, n) => {
+              delete embed.message
+
+              const name = `embed_${n + 1}.json`
+              const object = CircularJSON.stringify(embed, null, 4)
+              const embedFile = join(path, name)
+
+              jobs.push(
+                writeToFile(embedFile, object),
+                writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
+              )
+            })
           }
 
           if (attachments.size) {
             const attachmentsArray = attachments.array()
 
-            attachmentsArray.map(attachment => {
+            attachmentsArray.forEach(attachment => {
               const { proxyURL, filename } = attachment
+              const attachmentFile = join(path, `files/${filename}`)
 
-              const file = join(this.pathToSave, `${channelId}/${date}/files`, filename)
-              jobs.push(download(proxyURL, file))
+              jobs.push(
+                download(proxyURL, attachmentFile),
+                writeToFile(messageHistoryFile, `${messageFormat}: ${filename}\n`)
+              )
             })
           }
         })

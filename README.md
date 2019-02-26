@@ -35,6 +35,7 @@ client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
 | Type | Name | Description | Default
 | --- | --- | --- | --- |
 | String | pathToSave | Path where dumper files will be stored | folder "dump" in work directory |
+| Boolean | saveEmbeds | Whether to use save message embeds | false |
 | String | clearCommand | Command to call Cleaner | cl |
 | String | dumpCommand | Command to call Dumper | du |
 
