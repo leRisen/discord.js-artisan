@@ -87,12 +87,14 @@ class Artisan {
             const attachmentsArray = attachments.array()
 
             attachmentsArray.forEach(attachment => {
-              const { proxyURL, filename } = attachment
-              const attachmentFile = join(path, `files/${filename}`)
+              const { id, proxyURL, filename } = attachment
+
+              const name = `${id}_${filename}`
+              const attachmentFile = join(path, `files/${name}`)
 
               jobs.push(
                 download(proxyURL, attachmentFile),
-                writeToFile(messageHistoryFile, `${messageFormat}: ${filename}\n`)
+                writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
               )
             })
           }
