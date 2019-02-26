@@ -41,7 +41,11 @@ class Artisan {
     return recipient ? `in dialogue (${recipient.username})` : `in channel (${name})`
   }
 
-  async dumper (channel, messageId, totalCount = 0) {
+  async dumper (channel, messageId, total = {
+    embeds: 0,
+    messages: 0,
+    attachments: 0
+  }) {
     try {
       const place = this.getPlaceUsingChannel(channel)
       const { lastMessageId, filteredMessages } = await this.getMessages(channel, messageId)
@@ -66,6 +70,8 @@ class Artisan {
 
           if (content.length) {
             jobs.push(writeToFile(messageHistoryFile, `${messageFormat}: ${content}\n`))
+
+            total.messages += 1
           }
 
           if (embeds.length && this.saveEmbeds) {
@@ -81,6 +87,8 @@ class Artisan {
                 writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
               )
             })
+
+            total.embeds += embeds.length
           }
 
           if (attachments.size) {
@@ -97,17 +105,17 @@ class Artisan {
                 writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
               )
             })
+
+            total.attachments += attachmentsArray.length
           }
         })
 
         await Promise.all(jobs.map(j => j.catch(e => e)))
+        logger.info(`Currently saved ${JSON.stringify(total)} ${place}`)
 
-        totalCount += filteredMessages.length
-        logger.info(`Currently saved ${totalCount} message(-s) ${place}`)
-
-        return this.dumper(channel, lastMessageId, totalCount)
+        return this.dumper(channel, lastMessageId, total)
       } else {
-        logger.info(`All messages have been saved ${place}`)
+        logger.info(`${JSON.stringify(total)} has been saved ${place}`)
       }
     } catch (err) {
       logger.error('Oops, there was an error in "Dumper"\n\t', new Error(err))
