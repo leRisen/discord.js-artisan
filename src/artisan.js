@@ -9,6 +9,7 @@ class Artisan {
   constructor (options) {
     this.pathToSave = (options && options.pathToSave) || './dump'
     this.saveEmbeds = (options && options.saveEmbeds) || false
+    this.saveAttachments = (options && options.saveAttachments) || true
   }
 
   messageFilter ({ embeds, content, attachments }) {
@@ -91,7 +92,7 @@ class Artisan {
             total.embeds += embeds.length
           }
 
-          if (attachments.size) {
+          if (attachments.size && this.saveAttachments) {
             const attachmentsArray = attachments.array()
 
             attachmentsArray.forEach(attachment => {
