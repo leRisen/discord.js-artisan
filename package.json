@@ -10,7 +10,6 @@
   "author": "leRisen",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
     "winston": "^3.2.1",
     "fs-extra": "^7.0.1",
     "discord.js": "^11.4.2",

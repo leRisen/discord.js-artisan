@@ -1,36 +1,25 @@
 const fs = require('fs-extra')
-const axios = require('axios')
+const request = require('snekfetch')
 
-exports.sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-exports.download = (url, file) => {
-  const options = {
-    url,
-    method: 'GET',
-    responseType: 'stream'
-  }
-
-  const promises = [
-    fs.ensureFile(file),
-    axios(options)
-  ]
-
-  return Promise.all(promises.map(promise => promise.catch(e => e)))
-    .then(response => {
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const download = (url, file) =>
+  fs.ensureFile(file)
+    .then(() => {
       const writer = fs.createWriteStream(file)
-      response.data.pipe(writer)
+      request.get(url).pipe(writer)
 
       return new Promise((resolve, reject) => {
         writer.on('finish', resolve)
         writer.on('error', reject)
       })
     })
-}
 
-exports.writeToFile = (file, data) => {
-  const promises = [
-    fs.ensureFile(file),
-    fs.appendFile(file, data)
-  ]
+const writeToFile = (file, data) => fs.outputFile(file, data, {
+  flag: 'a'
+})
 
-  return Promise.all(promises.map(promise => promise.catch(e => e)))
+module.exports = {
+  sleep,
+  download,
+  writeToFile
 }
