@@ -1,6 +1,6 @@
 {
   "name": "discord.js-artisan",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Add-in that allows you to delete, save messages with files from the dialogue/channels in the Discord.",
   "main": "src/index.js",
   "scripts": {
@@ -10,7 +10,6 @@
   "author": "leRisen",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
     "winston": "^3.2.1",
     "fs-extra": "^7.0.1",
     "discord.js": "^11.4.2",
