@@ -14,9 +14,10 @@ const download = (url, file) =>
       })
     })
 
-const writeToFile = (file, data) => fs.outputFile(file, data, {
-  flag: 'a'
-})
+const writeToFile = (file, data) =>
+  fs.outputFile(file, data, {
+    flag: 'a'
+  })
 
 module.exports = {
   sleep,
