@@ -1,5 +1,7 @@
 declare module 'discord.js-artisan' {
-    import { Client, Message, DMChannel, TextChannel, GroupDMChannel } from 'discord.js'
+    import { Message, DMChannel, TextChannel, GroupDMChannel } from 'discord.js'
+
+    export const version: string
 
     export class Artisan {
         constructor(options?: artisanOptions)
