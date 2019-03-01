@@ -1,43 +1,48 @@
-<p align="center"><img src="https://nodei.co/npm/discord.js-artisan.png?downloads=true&stars=true" alt="NPM info"/></p>
-
 # Discord Artisan
-*this add-in that allows you to delete, save messages with files from the dialogue/channels in the Discord.*
 
-## Table Of Contents
-- [Install](#install)
-- [Example](#example)
-- [Commands](#commands)
-- [Available options](#available-options)
+[![Downloads](https://img.shields.io/npm/dt/discord.js-artisan.svg)](https://www.npmjs.com/package/discord.js-artisan)
+[![Build status](https://travis-ci.org/leRisen/discord.js-artisan.svg)](https://travis-ci.org/leRisen/discord.js-artisan)
 
-### Install
+## About
+
+Artisan is the add-in for [discord.js](https://github.com/discordjs/discord.js) which allows you to delete, save messages with files from the dialogue/channels.
+
+## Install
 
 - `npm install discord.js-artisan` <> `yarn add discord.js-artisan`
 
-### Example
+## Example
 
 ```js
-const discord = require('discord.js')
-const artisan = require('discord.js-artisan')
+const { Client } = require('discord.js')
+const { Artisan } = require('discord.js-artisan')
 
-const client = new discord.Client()
+const bot = new Client()
+const artisan = new Artisan({
+    pathToSave: 'YOUR_CUSTOM_PATH_HERE',
+    saveEmbeds: true
+})
 
-artisan.start(client)
-client.login('YOUR_USER_TOKEN_HERE').catch(console.error)
+bot
+    .once('ready', () => console.log('Ready!'))
+    .on('message', message => {
+        const { id: messageId, author, client, channel, content: cmd } = message
+        if (client.user.id !== author.id) return
+
+        // messageId - ID before which there will be a search for messages
+
+        if (cmd === 'dump') return artisan.dumper(channel, messageId)
+        else if (cmd === 'clear') return artisan.cleaner(channel, messageId)        
+    })
+    .login('YOUR_USER_TOKEN_HERE').catch(console.error)
 ```
 
-### Commands
-
-- `cl`: deleting your messages
-- `du`: save all messages with files
-
-### Available options
+## Available options
 
 | Type | Name | Description | Default
 | --- | --- | --- | --- |
 | String | pathToSave | Path where dumper files will be stored | folder "dump" in work directory |
 | Boolean | saveEmbeds | Whether to save embeds | false |
 | Boolean | saveAttachments | Whether to save attachments | true |
-| String | clearCommand | Command to call Cleaner | cl |
-| String | dumpCommand | Command to call Dumper | du |
 
-> These options need to be placed in the object and passed at `artisan.start(client, { options })`
+> These options need to be placed in the object and passed at `constuctor Artisan`
