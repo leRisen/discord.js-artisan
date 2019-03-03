@@ -1,7 +1,6 @@
 const logger = require('./logger')
 const { join } = require('path')
-const CircularJSON = require('circular-json')
-const { download, writeToFile } = require('./util/Util')
+const { download, writeToFile, removeKeysFromObject } = require('./util/Util')
 
 const MAX_LIMIT = 100
 
@@ -75,16 +74,18 @@ class Artisan {
             total.messages += 1
           }
 
+          let name
+          let object
+          let embedFile
+
           if (embeds.length && this.saveEmbeds) {
             embeds.forEach((embed, n) => {
-              delete embed.message
-
-              const name = `embed_${n + 1}.json`
-              const object = CircularJSON.stringify(embed, null, 4)
-              const embedFile = join(path, name)
+              name = `embed_${message.id}_${n + 1}.json`
+              object = removeKeysFromObject(embed, ['embed', 'message'])
+              embedFile = join(path, name)
 
               jobs.push(
-                writeToFile(embedFile, object),
+                writeToFile(embedFile, JSON.stringify(object)),
                 writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
               )
             })
@@ -95,11 +96,14 @@ class Artisan {
           if (attachments.size && this.saveAttachments) {
             const attachmentsArray = attachments.array()
 
+            let name
+            let attachmentFile
+
             attachmentsArray.forEach(attachment => {
               const { id, proxyURL, filename } = attachment
 
-              const name = `${id}_${filename}`
-              const attachmentFile = join(path, `files/${name}`)
+              name = `${id}_${filename}`
+              attachmentFile = join(path, `files/${name}`)
 
               jobs.push(
                 download(proxyURL, attachmentFile),

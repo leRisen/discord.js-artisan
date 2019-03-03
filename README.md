@@ -1,5 +1,6 @@
 # Discord Artisan
 
+[![Version](https://img.shields.io/npm/v/discord.js-artisan.svg)](https://www.npmjs.com/package/discord.js-artisan)
 [![Downloads](https://img.shields.io/npm/dt/discord.js-artisan.svg)](https://www.npmjs.com/package/discord.js-artisan)
 [![Build status](https://travis-ci.org/leRisen/discord.js-artisan.svg)](https://travis-ci.org/leRisen/discord.js-artisan)
 
