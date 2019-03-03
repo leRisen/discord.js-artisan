@@ -1,5 +1,5 @@
 const fs = require('fs-extra')
-const request = require('snekfetch')
+const request = require('request')
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 const download = (url, file) =>
