@@ -1,7 +1,6 @@
 const logger = require('./logger')
 const { join } = require('path')
-const CircularJSON = require('circular-json')
-const { download, writeToFile } = require('./util/Util')
+const { download, writeToFile, removeKeysFromObject } = require('./util/Util')
 
 const MAX_LIMIT = 100
 
@@ -77,14 +76,12 @@ class Artisan {
 
           if (embeds.length && this.saveEmbeds) {
             embeds.forEach((embed, n) => {
-              delete embed.message
-
               const name = `embed_${n + 1}.json`
-              const object = CircularJSON.stringify(embed, null, 4)
+              const object = removeKeysFromObject(embed, ['embed', 'message'])
               const embedFile = join(path, name)
 
               jobs.push(
-                writeToFile(embedFile, object),
+                writeToFile(embedFile, JSON.stringify(object)),
                 writeToFile(messageHistoryFile, `${messageFormat}: ${name}\n`)
               )
             })

@@ -11,7 +11,6 @@
   "author": "leRisen",
   "license": "MIT",
   "dependencies": {
-    "circular-json": "^0.5.9",
     "discord.js": "^11.4.2",
     "fs-extra": "^7.0.1",
     "winston": "^3.2.1"
