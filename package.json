@@ -11,8 +11,8 @@
   "author": "leRisen",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^11.4.2",
     "fs-extra": "^7.0.1",
+    "request": "^2.88.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
