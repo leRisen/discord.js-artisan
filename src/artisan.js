@@ -76,7 +76,7 @@ class Artisan {
 
           if (embeds.length && this.saveEmbeds) {
             embeds.forEach((embed, n) => {
-              const name = `embed_${n + 1}.json`
+              const name = `embed_${message.id}_${n + 1}.json`
               const object = removeKeysFromObject(embed, ['embed', 'message'])
               const embedFile = join(path, name)
 
