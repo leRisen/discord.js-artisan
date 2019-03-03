@@ -74,11 +74,15 @@ class Artisan {
             total.messages += 1
           }
 
+          let name
+          let object
+          let embedFile
+
           if (embeds.length && this.saveEmbeds) {
             embeds.forEach((embed, n) => {
-              const name = `embed_${message.id}_${n + 1}.json`
-              const object = removeKeysFromObject(embed, ['embed', 'message'])
-              const embedFile = join(path, name)
+              name = `embed_${message.id}_${n + 1}.json`
+              object = removeKeysFromObject(embed, ['embed', 'message'])
+              embedFile = join(path, name)
 
               jobs.push(
                 writeToFile(embedFile, JSON.stringify(object)),
@@ -92,11 +96,14 @@ class Artisan {
           if (attachments.size && this.saveAttachments) {
             const attachmentsArray = attachments.array()
 
+            let name
+            let attachmentFile
+
             attachmentsArray.forEach(attachment => {
               const { id, proxyURL, filename } = attachment
 
-              const name = `${id}_${filename}`
-              const attachmentFile = join(path, `files/${name}`)
+              name = `${id}_${filename}`
+              attachmentFile = join(path, `files/${name}`)
 
               jobs.push(
                 download(proxyURL, attachmentFile),
