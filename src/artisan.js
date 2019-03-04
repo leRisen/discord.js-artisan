@@ -74,11 +74,11 @@ class Artisan {
             total.messages += 1
           }
 
-          let name
-          let object
-          let embedFile
-
           if (embeds.length && this.saveEmbeds) {
+            let name
+            let object
+            let embedFile
+
             embeds.forEach((embed, n) => {
               name = `embed_${message.id}_${n + 1}.json`
               object = removeKeysFromObject(embed, ['embed', 'message'])
