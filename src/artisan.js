@@ -11,10 +11,6 @@ class Artisan {
     this.saveAttachments = (options && options.saveAttachments) || true
   }
 
-  messageFilter ({ embeds, content, attachments }) {
-    return embeds.length || content.length || attachments.size
-  }
-
   sortByCreatedAt (a, b) {
     return (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0)
   }
@@ -25,8 +21,7 @@ class Artisan {
         const messagesArray = messages.array()
         const lastMessage = messagesArray[messagesArray.length - 1]
 
-        const filteredMessages = messagesArray.filter(this.messageFilter)
-
+        const filteredMessages = messagesArray.filter(message => message.type === 'DEFAULT')
         logger.info(`Receiving ${MAX_LIMIT} messages after the message with id ${messageId}`)
 
         return {

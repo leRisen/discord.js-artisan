@@ -10,7 +10,6 @@ declare module 'discord.js-artisan' {
         public saveEmbeds: boolean
         public saveAttachments: boolean
 
-        private messageFilter({}: Message): boolean
         private sortByCreatedAt(a: Message, b: Message): number
 
         public getMessages(channel: TextableChannel, messageId: number): object
