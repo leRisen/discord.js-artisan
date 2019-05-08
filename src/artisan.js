@@ -1,8 +1,7 @@
 const logger = require('./logger')
 const { join } = require('path')
+const { MAX_LIMIT } = require('./util/Constants')
 const { download, writeToFile, removeKeysFromObject } = require('./util/Util')
-
-const MAX_LIMIT = 100
 
 class Artisan {
   constructor (options) {
