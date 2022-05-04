@@ -1,4 +1,4 @@
-# Discord Artisan
+# DISCLAIMER: Discordjs removed functionality for user tokens a long time ago, so this repository is moving to read-only mode and mark as deprecated
 
 [![Version](https://img.shields.io/npm/v/discord.js-artisan.svg)](https://www.npmjs.com/package/discord.js-artisan)
 [![Downloads](https://img.shields.io/npm/dt/discord.js-artisan.svg)](https://www.npmjs.com/package/discord.js-artisan)
